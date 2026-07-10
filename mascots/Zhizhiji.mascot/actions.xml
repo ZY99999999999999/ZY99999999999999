@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Mascot xmlns="http://www.group-finity.com/Mascot">
+  <ActionList>
+
+    <Action Name="Stand" Type="Stay" BorderType="Floor" Duration="600">
+      <Animation>
+        <Pose Image="/idle_01.png" ImageAnchor="80,160" Velocity="0,0" Duration="50"/>
+        <Pose Image="/idle_02.png" ImageAnchor="80,160" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <Action Name="StandRight" Type="Stay" BorderType="Floor" Duration="600">
+      <Animation>
+        <Pose Image="/idle_01_r.png" ImageAnchor="80,160" Velocity="0,0" Duration="50"/>
+        <Pose Image="/idle_02_r.png" ImageAnchor="80,160" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <!-- Walk 不加 BorderType="Floor"：多段 Floor 之间会误判 LostGround -->
+    <!-- Bug #6-2 修复：Duration=60 步长 180px > WallCling 触发阈 130px，Walk 落点会"跳过"捕获区
+         导致下一次链式 Walk 直接 OOB（见 BUGFIX_LOG.md Bug #8）。
+         修复：Duration=40 步长 120px + WallCling 阈值 ±200（见 behaviors.xml）。
+         安全条件：S < N - B_cling  →  120 < 200 - 23 = 177 ✅（余量 57px）
+                  N > S + B_walk   →  200 > 120 + 65 = 185 ✅（余量 15px）
+         其中 zhi walk_* alpha x=[15,145]（anchor=80，两侧缓冲各 65px），
+             wall_cling_left 80x80 alpha x=[0,80] anchor=23（左缓冲 23px），
+             wall_cling_right 80x80 alpha x=[0,80] anchor=56（右缓冲 24px）。 -->
+    <Action Name="WalkLeft" Type="Move" Duration="40"
+            Condition="#{mascot.anchor.x &gt; mascot.environment.workArea.left + 220}">
+      <Animation>
+        <Pose Image="/walk_right_01.png" ImageAnchor="80,160" Velocity="-3,0" Duration="8"/>
+        <Pose Image="/walk_right_02.png" ImageAnchor="80,160" Velocity="-3,0" Duration="8"/>
+        <Pose Image="/walk_right_03.png" ImageAnchor="80,160" Velocity="-3,0" Duration="8"/>
+        <Pose Image="/walk_right_04.png" ImageAnchor="80,160" Velocity="-3,0" Duration="8"/>
+      </Animation>
+    </Action>
+
+    <Action Name="WalkRight" Type="Move" Duration="40"
+            Condition="#{mascot.anchor.x &lt; mascot.environment.workArea.right - 220}">
+      <Animation>
+        <Pose Image="/walk_left_01.png" ImageAnchor="80,160" Velocity="3,0" Duration="8"/>
+        <Pose Image="/walk_left_02.png" ImageAnchor="80,160" Velocity="3,0" Duration="8"/>
+        <Pose Image="/walk_left_03.png" ImageAnchor="80,160" Velocity="3,0" Duration="8"/>
+        <Pose Image="/walk_left_04.png" ImageAnchor="80,160" Velocity="3,0" Duration="8"/>
+      </Animation>
+    </Action>
+
+    <Action Name="WallClingLeft" Type="Stay" Duration="999999">
+      <Animation>
+        <Pose Image="/wall_cling_left.png" ImageAnchor="23,70" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <Action Name="WallClingRight" Type="Stay" Duration="999999">
+      <Animation>
+        <Pose Image="/wall_cling_right.png" ImageAnchor="56,70" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <!-- 大笑挥手：站立触发的随机互动动作 -->
+    <Action Name="Laugh" Type="Stay" BorderType="Floor" Duration="300">
+      <Animation>
+        <Pose Image="/laugh_01.png" ImageAnchor="80,160" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <!-- 睡觉：站立触发的随机休眠动作 -->
+    <Action Name="Sleep" Type="Stay" BorderType="Floor" Duration="3600">
+      <Animation>
+        <Pose Image="/sleep_01.png" ImageAnchor="80,160" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <!-- Pipi来玩：站立触发的随机互动动作，约1分钟（3600帧@60fps），宽帧320x160 -->
+    <Action Name="PipiPlay" Type="Stay" BorderType="Floor" Duration="3600">
+      <Animation>
+        <Pose Image="/pipi_play_01.png" ImageAnchor="160,160" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <!-- 吃饭：站立触发的随机休闲动作，约1分钟（3600帧@60fps） -->
+    <Action Name="Eat" Type="Stay" BorderType="Floor" Duration="3600">
+      <Animation>
+        <Pose Image="/eat_01.png" ImageAnchor="80,159" Velocity="0,0" Duration="50"/>
+      </Animation>
+    </Action>
+
+    <!-- ScanGreet：扫描持 "greet" affordance 的 mascot（ham）并跑过去 -->
+    <!-- ScanMove.tick 每 tick 根据 anchor.x vs targetX 主动 setLookRight，并做朝向翻转。 -->
+    <!-- Pose.next 位移：newX = x + (lookRight ? -dx : +dx)，所以 Velocity 固定取负即可"朝目标走"。 -->
+    <!-- 图像方向：ImagePairLoader 只加载原图，另一向自动 flip。 -->
+    <!-- walk_right_*.png 原图实际朝左（与 WalkLeft Action 用它 + lookRight=false 一致）； -->
+    <!-- 故这里统一用 walk_right_*.png：lookRight=false 时原图（朝左），lookRight=true 时 flip（朝右）。 -->
+    <!-- 不用条件分支，单 Animation 交给 ScanMove 的 setLookRight 自动翻转朝向。 -->
+    <Action Name="ScanGreet" Type="Embedded"
+            Class="com.group_finity.mascot.action.ScanMove"
+            Affordance="greet"
+            Behavior="GreetAct"
+            TargetBehavior="GreetReact"
+            TargetLook="true">
+      <Animation>
+        <Pose Image="/walk_right_01.png" ImageAnchor="80,160" Velocity="-4,0" Duration="8"/>
+        <Pose Image="/walk_right_02.png" ImageAnchor="80,160" Velocity="-4,0" Duration="8"/>
+        <Pose Image="/walk_right_03.png" ImageAnchor="80,160" Velocity="-4,0" Duration="8"/>
+        <Pose Image="/walk_right_04.png" ImageAnchor="80,160" Velocity="-4,0" Duration="8"/>
+      </Animation>
+    </Action>
+
+    <!-- GreetAct：到达 ham 后的大笑动画 -->
+    <!-- 到达时 zhi 的 anchor 被 ScanMove 强制设为与 ham 完全重合。 -->
+    <!-- 第一帧用正 dx 给一次"往后退"的位移：Pose.next 公式 newX=x+(lookRight?-dx:+dx) -->
+    <!-- 正 dx 方向：lookRight=true (从左追来) → newX 减 → zhi 退到 ham 左侧 -->
+    <!-- 正 dx 方向：lookRight=false (从右追来) → newX 加 → zhi 退到 ham 右侧 -->
+    <!-- 130px 刚好让两个 160x160 的 sprite 紧贴不重叠 -->
+    <!-- 注意：新 Action 首个 tick getTime()=1（非 0），所以 pose1.Duration 必须 >=2 才能命中 t=1 -->
+    <!-- pose2.Duration 必须让 anim 总长 > Action Duration 否则循环回 pose1 导致持续后退 -->
+    <Action Name="GreetAct" Type="Stay" BorderType="Floor" Duration="300">
+      <Animation>
+        <Pose Image="/laugh_01.png" ImageAnchor="80,160" Velocity="130,0" Duration="2"/>
+        <Pose Image="/laugh_01.png" ImageAnchor="80,160" Velocity="0,0"   Duration="300"/>
+      </Animation>
+    </Action>
+
+    <Action Name="Fall" Type="Embedded" Loop="true"
+            Class="com.group_finity.mascot.action.Fall"
+            InitialVX="0" InitialVY="0"
+            Gravity="2">
+      <Animation>
+        <Pose Image="/fall_01.png" ImageAnchor="80,160" Velocity="0,0" Duration="100"/>
+      </Animation>
+    </Action>
+
+    <Action Name="Dragged" Type="Embedded" Loop="true"
+            Class="com.group_finity.mascot.action.Dragged">
+      <Animation>
+        <Pose Image="/drag_01.png" ImageAnchor="80,160" Velocity="0,0" Duration="8"/>
+      </Animation>
+    </Action>
+
+    <Action Name="Thrown" Type="Stay" Duration="1">
+      <Animation>
+        <Pose Image="/fall_01.png" ImageAnchor="80,160" Velocity="0,0" Duration="1"/>
+      </Animation>
+    </Action>
+
+  </ActionList>
+</Mascot>
