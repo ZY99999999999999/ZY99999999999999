@@ -1,5 +1,7 @@
 # guide-point-flow 代码—Case 合并场景库（静态分析版）
 
+> **阅读说明（2026-08-14 更新）**：本文件中的 `CV-xxx` 是按 response 字段集合抽取的**case 证据编号**，不再作为统一场景主键。同一路由下若 response 的操作符或期望值不同，可能落在同一 CV 中，仍必须拆分为不同场景。全量以“场景为主键”的目录见 [guide-point-flow-scene-primary-catalog.md](guide-point-flow-scene-primary-catalog.md)；本文件保留为 CV → 原始 case/assert 的追溯索引。
+
 ## 结论
 
 原 `guide-point-flow-scene-map.md` **只符合 mentor 要求中的第一半**：它完整列出了 `parameter.conf` 中 84 条代码路由场景。它没有读取 case 的请求、response 断言，也没有输出“代码场景 → case 验证场景 → case ID”的映射，因此**单独使用不符合完整要求**。

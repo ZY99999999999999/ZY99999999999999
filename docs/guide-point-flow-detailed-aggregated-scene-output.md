@@ -1,5 +1,7 @@
 # guide-point-flow 拆分后的统一场景清单（评审版）
 
+> **阅读说明（2026-08-14 更新）**：本文是按业务阅读的 84 条路由评审摘要；其中的 `CV-xxx` 仅为证据索引，不是场景主键。全部 case 已按“最终路由 + 请求指纹 + 完整 response 断言”重建为场景主键，见 [guide-point-flow-scene-primary-catalog.md](guide-point-flow-scene-primary-catalog.md)。后续 HDFS/Jenkins 只能消费后者的 `scene_id`。
+
 ## 使用口径
 
 本清单用于 mentor/leader 评审“场景是否拆对”，不是只列 84 条 `parameter.conf` 路由。
