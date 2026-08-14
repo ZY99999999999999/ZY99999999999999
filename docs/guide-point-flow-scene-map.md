@@ -1,5 +1,9 @@
 # 引导点场景地图（业务阅读版）
 
+> 本文只回答“`parameter.conf` 中有哪些**代码路由场景**”。它不是完整的场景库：不能据此直接判断某个场景由哪些自动化 case、哪些 response 断言来验证。
+>
+> 完整的“代码路由场景 + case response 验证场景 + case ID”合并结果见：[guide-point-flow-code-case-scene-library.md](guide-point-flow-code-case-scene-library.md)。后者才满足“分析 case 验证场景、按 response 聚类、合并和去重”的要求。
+
 ## 先看全貌
 
 `guide-point-flow-v2` 当前共有 **84 条静态路由场景**。这里的“一条场景”指一次请求最终会命中的一套路由配置，而不是配置内并行执行的单个 scene。
@@ -222,4 +226,3 @@
 | 订单/预估消费命中二次确认、cell/link、违停 | `dbck_trip` / `dropoff_cell_link` / `dropoff_link_lng_lat` / `trip_top1_park` |
 
 完整的配置字段、每条场景的 `scene_merge`、`union_processer`、降级链路与精确配置行号，见同目录的技术核对版 `guide-point-flow-static-scene-catalog.md`。
-
